@@ -12,6 +12,19 @@ type User = {
   email: string;
 };
 
+const customNames = [
+  'tangol',
+  'gabo',
+  'dapdap',
+  'jason',
+  'ash',
+  'lims',
+  'nardo',
+  'jorge',
+  'dolps',
+  'jims',
+];
+
 export default function HomeScreen() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +39,12 @@ export default function HomeScreen() {
         }
 
         const data: User[] = await response.json();
-        setUsers(data);
+        setUsers(
+          data.map((user, index) => ({
+            ...user,
+            name: customNames[index] ?? user.name,
+          }))
+        );
       } catch (fetchError) {
         setError(fetchError instanceof Error ? fetchError.message : 'Unable to load users.');
       } finally {
@@ -59,14 +77,7 @@ export default function HomeScreen() {
               </ThemedText>
               <ThemedText>@{user.username}</ThemedText>
               <ThemedText>{user.email}</ThemedText>
-            const customNames = ['tangol', 'gabo', 'dapdap', 'jason', 'ash', 'lims', 'nardo', 'jorge', 'dolps', 'jims'];
-            
-            setUsers(
-              data.map((user, index) => ({
-                ...user,
-                name: customNames[index] ?? user.name,
-              }))
-            );            </ThemedView>
+            </ThemedView>
           ))}
         </ScrollView>
       )}
