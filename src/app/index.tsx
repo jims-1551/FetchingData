@@ -1,62 +1,66 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+type Post = {
+  id: number;
+  title: string;
+  body: string;
+};
 
 export default function HomeScreen() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=10');
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const data: Post[] = await response.json();
+        setPosts(data);
+      } catch (fetchError) {
+        setError(fetchError instanceof Error ? fetchError.message : 'Unable to load posts.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void fetchPosts();
+  }, []);
+
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
+      <ThemedText type="title" style={styles.heading}>
+        Latest Posts
+      </ThemedText>
+
+      {isLoading ? (
+        <ThemedView style={styles.status}>
+          <ActivityIndicator />
+          <ThemedText>Loading...</ThemedText>
         </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
+      ) : error ? (
+        <ThemedText style={styles.error}>Could not load posts: {error}</ThemedText>
+      ) : (
+        <ScrollView contentContainerStyle={styles.list}>
+          {posts.map((post) => (
+            <ThemedView key={post.id} type="backgroundElement" style={styles.post}>
+              <ThemedText type="subtitle" style={styles.postTitle}>
+                {post.title}
+              </ThemedText>
+              <ThemedText>{post.body}</ThemedText>
+            </ThemedView>
+          ))}
+        </ScrollView>
+      )}
     </ThemedView>
   );
 }
@@ -64,35 +68,33 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    padding: Spacing.four,
   },
-  safeArea: {
+  heading: {
+    fontSize: 32,
+    lineHeight: 40,
+    marginBottom: Spacing.three,
+  },
+  status: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.two,
   },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
+  list: {
     gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingBottom: Spacing.four,
+  },
+  post: {
+    borderRadius: Spacing.two,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
+  postTitle: {
+    fontSize: 20,
+    lineHeight: 28,
+  },
+  error: {
+    color: '#d32f2f',
   },
 });
