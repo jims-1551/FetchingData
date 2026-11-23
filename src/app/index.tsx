@@ -5,41 +5,42 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 
-type Post = {
+type User = {
   id: number;
-  title: string;
-  body: string;
+  name: string;
+  username: string;
+  email: string;
 };
 
 export default function HomeScreen() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchPosts() {
+    async function fetchUsers() {
       try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=10');
+        const response = await fetch('https://jsonplaceholder.typicode.com/users');
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }
 
-        const data: Post[] = await response.json();
-        setPosts(data);
+        const data: User[] = await response.json();
+        setUsers(data);
       } catch (fetchError) {
-        setError(fetchError instanceof Error ? fetchError.message : 'Unable to load posts.');
+        setError(fetchError instanceof Error ? fetchError.message : 'Unable to load users.');
       } finally {
         setIsLoading(false);
       }
     }
 
-    void fetchPosts();
+    void fetchUsers();
   }, []);
 
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.heading}>
-        Latest Posts
+        User List
       </ThemedText>
 
       {isLoading ? (
@@ -48,15 +49,16 @@ export default function HomeScreen() {
           <ThemedText>Loading...</ThemedText>
         </ThemedView>
       ) : error ? (
-        <ThemedText style={styles.error}>Could not load posts: {error}</ThemedText>
+        <ThemedText style={styles.error}>Could not load users: {error}</ThemedText>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
-          {posts.map((post) => (
-            <ThemedView key={post.id} type="backgroundElement" style={styles.post}>
+          {users.map((user) => (
+            <ThemedView key={user.id} type="backgroundElement" style={styles.post}>
               <ThemedText type="subtitle" style={styles.postTitle}>
-                {post.title}
+                {user.name}
               </ThemedText>
-              <ThemedText>{post.body}</ThemedText>
+              <ThemedText>@{user.username}</ThemedText>
+              <ThemedText>{user.email}</ThemedText>
             </ThemedView>
           ))}
         </ScrollView>
