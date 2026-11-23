@@ -63,20 +63,20 @@ export default function HomeScreen() {
 
       {isLoading ? (
         <ThemedView style={styles.status}>
-          <ActivityIndicator />
-          <ThemedText>Loading...</ThemedText>
+          <ActivityIndicator color="#ff334f" />
+          <ThemedText style={styles.loadingText}>Loading...</ThemedText>
         </ThemedView>
       ) : error ? (
         <ThemedText style={styles.error}>Could not load users: {error}</ThemedText>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
           {users.map((user) => (
-            <ThemedView key={user.id} type="backgroundElement" style={styles.post}>
-              <ThemedText type="subtitle" style={styles.postTitle}>
+            <ThemedView key={user.id} style={styles.userCard}>
+              <ThemedText type="subtitle" style={styles.userName}>
                 {user.name}
               </ThemedText>
-              <ThemedText>@{user.username}</ThemedText>
-              <ThemedText>{user.email}</ThemedText>
+              <ThemedText style={styles.username}>@{user.username}</ThemedText>
+              <ThemedText style={styles.email}>{user.email}</ThemedText>
             </ThemedView>
           ))}
         </ScrollView>
@@ -89,32 +89,50 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: Spacing.four,
+    backgroundColor: '#090909',
   },
   heading: {
     fontSize: 32,
     lineHeight: 40,
     marginBottom: Spacing.three,
+    color: '#ff334f',
   },
   status: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.two,
+    backgroundColor: '#090909',
+  },
+  loadingText: {
+    color: '#f5f5f5',
   },
   list: {
     gap: Spacing.three,
     paddingBottom: Spacing.four,
   },
-  post: {
+  userCard: {
     borderRadius: Spacing.two,
     padding: Spacing.three,
     gap: Spacing.two,
+    backgroundColor: '#171717',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#75202d',
+    borderLeftWidth: 4,
+    borderLeftColor: '#e50914',
   },
-  postTitle: {
+  userName: {
     fontSize: 20,
     lineHeight: 28,
+    color: '#ff334f',
+  },
+  username: {
+    color: '#f5f5f5',
+  },
+  email: {
+    color: '#bdbdbd',
   },
   error: {
-    color: '#d32f2f',
+    color: '#ff334f',
   },
 });
