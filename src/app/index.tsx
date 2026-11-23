@@ -59,7 +59,14 @@ export default function HomeScreen() {
               </ThemedText>
               <ThemedText>@{user.username}</ThemedText>
               <ThemedText>{user.email}</ThemedText>
-            </ThemedView>
+            const customNames = ['tangol', 'gabo', 'dapdap', 'jason', 'ash', 'lims', 'nardo', 'jorge', 'dolps', 'jims'];
+            
+            setUsers(
+              data.map((user, index) => ({
+                ...user,
+                name: customNames[index] ?? user.name,
+              }))
+            );            </ThemedView>
           ))}
         </ScrollView>
       )}
